@@ -12,16 +12,13 @@ func main() {
 	yamlPath := flag.String("yml", "./files/urls.yml", "Path to the yaml file")
 	jsonPath := flag.String("json", "./files/urls.json", "Path to the json file")
 	flag.Parse()
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Hello World!")
-	})
-	pathsToUrls := map[string]string{
-		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
-		"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
+	mux := defaultMux()
+
+	inMemoryHandler, err := urlshort.InMemoryHandler(mux)
+	if err != nil {
+		panic(err)
 	}
-	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
-	yamlHandler, err := urlshort.YAMLHandler(*yamlPath, mapHandler)
+	yamlHandler, err := urlshort.YAMLHandler(*yamlPath, inMemoryHandler)
 	if err != nil {
 		panic(err)
 	}
@@ -31,4 +28,12 @@ func main() {
 	}
 	fmt.Println("Starting the server on :8080")
 	http.ListenAndServe(":8080", jsonHandler)
+}
+
+func defaultMux() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "Hello World!")
+	})
+	return mux
 }

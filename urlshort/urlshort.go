@@ -24,6 +24,14 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 	}
 }
 
+func InMemoryHandler(fallback http.Handler) (http.HandlerFunc, error) {
+	pathsToUrls := map[string]string{
+		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
+		"/yaml-godoc":     "https://godoc.org/gopkg.in/yaml.v2",
+	}
+	return MapHandler(pathsToUrls, fallback), nil
+}
+
 func YAMLHandler(filePath string, fallback http.Handler) (http.HandlerFunc, error) {
 	var urls []pathUrl
 	file := fileFromPath(filePath)
